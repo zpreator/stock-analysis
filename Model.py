@@ -144,7 +144,7 @@ def PredictStonks(ticker, model_path, date):
     pred_price = model.predict(X_test)
     #undo the scaling 
     pred_price = scaler.inverse_transform(pred_price)
-    print(pred_price)
+    print(ticker, ' predicted price on 2020-08-19', pred_price)
     return pred_price
 
 def TrainStonksModel(ticker, save_path, start='2012-01-01', end='2020-08-18'):
