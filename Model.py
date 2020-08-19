@@ -7,15 +7,28 @@ import matplotlib.pyplot as plt
 import datetime
 import os
 from pandas.plotting import register_matplotlib_converters
+import yfinance as yf
+yf.pdr_override()
 register_matplotlib_converters()
 plt.style.use('fivethirtyeight')
 
 def GetStonkData(ticker, start, end):
     #Get the stock quote 
-    df = web.DataReader(ticker, data_source='yahoo', start=start, end=end) 
-    #Show the data 
+    df = web.data.get_data_yahoo(ticker, data_source='yahoo', start=start, end=end) 
+    ticker = yf.Ticker(ticker)
+    rec = pd.DataFrame(ticker.recommendations)
+    rec.index = pd.to_datetime(rec.index, format='%m/%d/%Y').strftime('%Y-%m-%d')
     print(df.head())
-    return df
+    print(rec.head())
+    tbl = df.merge(rec, left_index=True, right_index=True)
+
+    grade_list = {'(?i)strong buy': 0 , '(?i)buy': 1, '(?i)outperform': 2, '(?i)overweight': 2, '(?i)positive': 2, '(?i)hold': 3, '(?i)neutral': 3, '(?i)equal-weight': 3, '(?i)underperform': 4, '(?i)underweight': 4, '(?i)negative': 4, '(?i)sell': 5, '(?i)strong sell': 5}
+    tbl['agg grade'] = tbl['To Grade'].replace(grade_list, regex=True)
+
+    tbl = tbl['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'agg grade']
+    #Show the data 
+    print(tbl.head())
+    return tbl
 
 def DisplayStonks(df):
     #Visualize the closing price history
@@ -155,4 +168,4 @@ def TrainStonksModel(ticker, save_path, start='2012-01-01', end='2020-08-18'):
     PredictFuture(model, scaler, x_test, y_test, data)
     model.save(save_path)
 
-# GetStonks('AAPL')
+GetStonkData('AAPL', start='2012-01-01', end='2020-08-18')
