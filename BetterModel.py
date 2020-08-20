@@ -25,7 +25,8 @@ def GetStonkData(ticker_name, start, end):
     tbl = df.merge(rec, left_index=True, right_index=True)
 
     grade_list = {'(?i)strong buy': 0 , '(?i)buy': 1, '(?i)outperform': 2, '(?i)overweight': 2, '(?i)positive': 2, '(?i)hold': 3, '(?i)neutral': 3, '(?i)equal-weight': 3, '(?i)underperform': 4, '(?i)underweight': 4, '(?i)negative': 4, '(?i)sell': 5, '(?i)strong sell': 5}
-    tbl['agg grade'] = tbl['To Grade'].replace(grade_list, regex=True)
+    tbl['agg grade'] = tbl['To Grade'].replace(grade_list, regex=True).astype(float)
+    tbl = tbl[tbl['agg grade'].isin(str(range(6)))]
 
     tomorrow = tbl['Close']
     tbl = tbl[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume','agg grade']]
